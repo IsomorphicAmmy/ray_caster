@@ -7,7 +7,7 @@
 
 #define SCENE_WIDTH 6
 #define SCENE_HEIGHT 6
-#define RECT_WIDTH 1
+#define RECT_WIDTH 20
 
 #define FOV 75
 
@@ -108,12 +108,13 @@ ColoredDistance CastRayFromPlayer(struct Player p, float cast_angle)
 		else if (block == 2)
 			result.color = RED;
 		result.d = xd * cos(cast_angle);
+		result.color = (Color) {result.color.r * 0.9, result.color.g * 0.9, result.color.b * 0.9, result.color.a};
 	}
 	else 
 	{
 		result.d = yd * cos(cast_angle);
+		result.color = (Color) {result.color.r * 0.7, result.color.g * 0.7, result.color.b * 0.7, result.color.a};
 	}
-	
 	return result;
 }
 
@@ -165,7 +166,9 @@ int main(void)
 				ColoredDistance cd = CastRayFromPlayer(p, cast_angle);
 
 				int rect_height = HEIGHT/cd.d; if (rect_height > HEIGHT) rect_height = HEIGHT;
-				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), (HEIGHT - rect_height)/2, RECT_WIDTH, rect_height, cd.color);
+				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), 0, RECT_WIDTH, (HEIGHT - rect_height)/2 + 1, BLUE);
+				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), (HEIGHT - rect_height)/2 - 1, RECT_WIDTH, rect_height + 1, cd.color);
+				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), HEIGHT - (HEIGHT - rect_height)/2 - 1, RECT_WIDTH, (HEIGHT - rect_height)/2, (Color) {127, 127, 127,255});
 			}
 		EndDrawing();
 	}
