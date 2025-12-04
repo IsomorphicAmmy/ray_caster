@@ -9,10 +9,9 @@
 void StepRay(float* rx, float* ry, float yo, float xo)
 {
 	int dof;
-
 	while(dof < 8)
 	{
-		if ((*rx) * (*ry) >= 0.0f && *ry * SCENE_WIDTH + *rx < SCENE_WIDTH*SCENE_HEIGHT)
+		if (((int) *rx) * ((int) *ry) >= 0.0f && *ry * SCENE_WIDTH + *rx < SCENE_WIDTH*SCENE_HEIGHT)
 		{
 			int block = GetSceneValue(*rx, *ry);
 			if (block != 0) { break; }
@@ -35,6 +34,7 @@ void CastRay(struct Player p, float cast_angle)
 	float px = p.pos.x, py = p.pos.y;
 	float ra = p.angle + cast_angle;
 	Color ray_color;
+	Color yc, xc;
 
 	while (ra < 0)
 		ra += PI*2;
@@ -47,16 +47,16 @@ void CastRay(struct Player p, float cast_angle)
 	if(ra != 0 && ra != PI)
 	{
 		StepRay(&rx, &ry, yo, xo);
-		int block = GetSceneValue(rx, ry);
+		int block = GetSceneValue((int) rx, (int) ry);
 		if(block == 1)
-			ray_color = WHITE;
+			yc = WHITE;
 		else if(block == 2)
-			ray_color = RED;
+			yc = RED;
 	}
 	else {
 		rx = px;
 		ry = py;
-		ray_color = BLUE;
+		yc = BLUE;
 	}
 	
 	float yd = sqrt((py-ry)*(py-ry) + (px-rx)*(px-rx));
@@ -67,10 +67,16 @@ void CastRay(struct Player p, float cast_angle)
 	if(ra != PI/2 && ra != 3*PI/2)
 	{
 		StepRay(&rx, &ry, yo, xo);
+		int block = GetSceneValue((int) rx, (int) ry);
+		if(block == 1)
+			xc = WHITE;
+		else if(block == 2)
+			xc = RED;
 	}
 	else {
 		rx = px;
 		ry = py;
+		xc = BLUE;
 	}
 
 	float xd = sqrt((py-ry)*(py-ry) + (px-rx)*(px-rx));
@@ -80,16 +86,13 @@ void CastRay(struct Player p, float cast_angle)
 
 	if (yd > xd)
 	{
-		int block = GetSceneValue(rx, ry);
-		if (block == 1)
-			ray_color = WHITE;
-		else if (block == 2)
-			ray_color = RED;
+		ray_color = xc;
 		d = xd * cos(cast_angle);
 		ray_color = (Color) {ray_color.r * 0.9, ray_color.g * 0.9, ray_color.b * 0.9, ray_color.a};
 	}
 	else 
 	{
+		ray_color = yc;
 		d = yd * cos(cast_angle);
 		ray_color = (Color) {ray_color.r * 0.7, ray_color.g * 0.7, ray_color.b * 0.7, ray_color.a};
 	}
