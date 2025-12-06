@@ -1,5 +1,6 @@
 source = src/main.c src/player.c src/scene.c
 libs = -lraylib -lm
+flags = -ggdb -fsanitize=address
 
 ray_caster: $(source) build
 	gcc $(source) $(libs) -o build/ray_caster
@@ -18,5 +19,5 @@ scene.c: scene.h
 clean:
 	rm -r build
 
-run:
+run: ray_caster
 	./build/ray_caster

@@ -1,20 +1,25 @@
 #include <math.h>
 #include <raylib.h>
+#include <stdbool.h>
 
 #include "player.h"
 #include "scene.h"
 #include "window.h"
 
-
-void StepRay(float* rx, float* ry, float yo, float xo)
+float distance(float x0, float y0, float x1, float y1)
 {
-	int dof;
+	return sqrt((x0-x1)*(x0-x1) + (y0-y1)*(y0-y1));
+}
+
+bool StepRay(float* rx, float* ry, float yo, float xo)
+{
+	int dof = 0;
 	while(dof < 8)
 	{
-		if (((int) *rx) * ((int) *ry) >= 0.0f && *ry * SCENE_WIDTH + *rx < SCENE_WIDTH*SCENE_HEIGHT)
+		if ((*rx) * (*ry) >= 0.0f && (*ry) * SCENE_WIDTH + (*rx) < SCENE_WIDTH*SCENE_HEIGHT)
 		{
-			int block = GetSceneValue(*rx, *ry);
-			if (block != 0) { break; }
+			int block = GetSceneValue((int) *rx, (int) *ry);
+			if (block != 0) { return true; }
 			else 
 			{
 				*rx += xo;
@@ -23,12 +28,14 @@ void StepRay(float* rx, float* ry, float yo, float xo)
 			}
 		}
 		else
-			break;
+			return false;
 	}
+	return false;
 }
 
-void CastRay(struct Player p, float cast_angle)
+struct ColoredDistance CastRay(struct Player p, float cast_angle)
 {
+	bool colided;
 	float d;
 	float rx, ry, yo, xo;
 	float px = p.pos.x, py = p.pos.y;
@@ -46,12 +53,15 @@ void CastRay(struct Player p, float cast_angle)
 	
 	if(ra != 0 && ra != PI)
 	{
-		StepRay(&rx, &ry, yo, xo);
-		int block = GetSceneValue((int) rx, (int) ry);
-		if(block == 1)
-			yc = WHITE;
-		else if(block == 2)
-			yc = RED;
+		colided = StepRay(&rx, &ry, yo, xo);
+		if(colided)
+		{
+			int block = GetSceneValue((int) rx, (int) ry);
+			if(block == 1)
+				yc = WHITE;
+			else if(block == 2)
+				yc = RED;
+		}
 	}
 	else {
 		rx = px;
@@ -59,19 +69,22 @@ void CastRay(struct Player p, float cast_angle)
 		yc = BLUE;
 	}
 	
-	float yd = sqrt((py-ry)*(py-ry) + (px-rx)*(px-rx));
+	float yd = distance(px, py, rx, ry);
 
 	if (ra < PI/2 || ra > 3*PI/2) {rx = floor(px) + 1.00001f; xo =  1.0f; ry = (px - rx)*tan(ra) + py; yo = -xo*tan(ra);}
 	if (ra > PI/2 && ra < 3*PI/2) {rx = floor(px) - 0.00001f; xo = -1.0f; ry = (px - rx)*tan(ra) + py; yo = -xo*tan(ra);}
 
 	if(ra != PI/2 && ra != 3*PI/2)
 	{
-		StepRay(&rx, &ry, yo, xo);
-		int block = GetSceneValue((int) rx, (int) ry);
-		if(block == 1)
-			xc = WHITE;
-		else if(block == 2)
-			xc = RED;
+		colided = StepRay(&rx, &ry, yo, xo);
+		if(colided)
+		{
+			int block = GetSceneValue((int) rx, (int) ry);
+			if(block == 1)
+				xc = WHITE;
+			else if(block == 2)
+				xc = RED;
+		}
 	}
 	else {
 		rx = px;
@@ -79,7 +92,7 @@ void CastRay(struct Player p, float cast_angle)
 		xc = BLUE;
 	}
 
-	float xd = sqrt((py-ry)*(py-ry) + (px-rx)*(px-rx));
+	float xd = distance(px, py, rx, ry);
 
 	if (cast_angle < 0.0f)
 		cast_angle = -cast_angle;
@@ -97,10 +110,5 @@ void CastRay(struct Player p, float cast_angle)
 		ray_color = (Color) {ray_color.r * 0.7, ray_color.g * 0.7, ray_color.b * 0.7, ray_color.a};
 	}
 
-	int i = ((cast_angle*180/PI + (float)FOV/2.0f) * ((float) WIDTH/RECT_WIDTH - 1.0f))/FOV;
-
-	int rect_height = HEIGHT/d; if (rect_height > HEIGHT) rect_height = HEIGHT;
-	DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), 0, RECT_WIDTH, (HEIGHT - rect_height)/2 + 1, BLUE);
-	DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), (HEIGHT - rect_height)/2 - 1, RECT_WIDTH, rect_height + 1, ray_color);
-	DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), HEIGHT - (HEIGHT - rect_height)/2 - 1, RECT_WIDTH, (HEIGHT - rect_height)/2, (Color) {127, 127, 127, 255});
+	return (struct ColoredDistance) { d, ray_color };
 }

@@ -10,4 +10,10 @@ struct Player
 	float angle;
 };
 
-void CastRay(const struct Player p, float cast_angle);
+struct ColoredDistance
+{
+	float d;
+	Color c;
+};
+
+struct ColoredDistance CastRay(const struct Player p, float cast_angle);

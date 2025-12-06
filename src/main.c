@@ -43,8 +43,12 @@ int main(void)
 			{
 				float iangle = (float) i * FOV / (((float)WIDTH/RECT_WIDTH - 1));
 				float cast_angle = PI/180 * (iangle - (float) FOV/2);
-				
-				CastRay(p, cast_angle);
+				struct ColoredDistance cd = CastRay(p, cast_angle);
+
+				int rect_height = HEIGHT/cd.d; if (rect_height > HEIGHT) rect_height = HEIGHT;
+				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), 0, RECT_WIDTH, (HEIGHT - rect_height)/2 + 1, BLUE);
+				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), (HEIGHT - rect_height)/2 - 1, RECT_WIDTH, rect_height + 1, cd.c);
+				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), HEIGHT - (HEIGHT - rect_height)/2 - 1, RECT_WIDTH, (HEIGHT - rect_height)/2, (Color) {127, 127, 127,255});
 			}
 		EndDrawing();
 
