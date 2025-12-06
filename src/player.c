@@ -11,6 +11,7 @@ float distance(float x0, float y0, float x1, float y1)
 	return sqrt((x0-x1)*(x0-x1) + (y0-y1)*(y0-y1));
 }
 
+//Step ray with y offset and x offset until it hits someþing or goes out of bounds
 bool StepRay(float* rx, float* ry, float yo, float xo)
 {
 	int dof = 0;
@@ -33,6 +34,7 @@ bool StepRay(float* rx, float* ry, float yo, float xo)
 	return false;
 }
 
+//Gets a ColoredDistance by stepping þrough y by one
 struct ColoredDistance GetRayYCollision(float ra, float px, float py)
 {
 	struct ColoredDistance result;
@@ -62,6 +64,7 @@ struct ColoredDistance GetRayYCollision(float ra, float px, float py)
 	return result;
 }
 
+//Gets a ColoredDistance by stepping þrough x by one
 struct ColoredDistance GetRayXCollision(float ra, float px, float py)
 {
 	struct ColoredDistance result;
@@ -108,13 +111,13 @@ struct ColoredDistance CastRay(struct Player p, float cast_angle)
 	{
 		ray_color = xcd.c;
 		d = xcd.d * cos(cast_angle);
-		ray_color = (Color) {xcd.c.r * 0.9, xcd.c.g * 0.9, xcd.c.b * 0.9, xcd.c.a};
+		ray_color = (Color) {xcd.c.r * 0.9, xcd.c.g * 0.9, xcd.c.b * 0.9, xcd.c.a}; 
 	}
 	else 
 	{
 		ray_color = ycd.c;
 		d = ycd.d * cos(cast_angle);
-		ray_color = (Color) {ycd.c.r * 0.7, ycd.c.g * 0.7, ycd.c.b * 0.7, ycd.c.a};
+		ray_color = (Color) {ycd.c.r * 0.7, ycd.c.g * 0.7, ycd.c.b * 0.7, ycd.c.a}; //0.7 makes shadows
 	}
 
 	return (struct ColoredDistance) { d, ray_color };

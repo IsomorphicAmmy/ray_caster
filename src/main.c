@@ -30,6 +30,7 @@ int main(void)
 		if (IsKeyDown(KEY_D))
 			p.pos = (Vector2) {p.pos.x + pvel * sin(p.angle) * dt, p.pos.y + pvel * cos(p.angle) * dt};
 
+		//Collision check
 		while (GetSceneValue((int) floor(p.pos.x), (int) floor(p.pos.y)) != 0)
 		{
 			if (floor(p_last_pos.x) == floor(p.pos.x) - 1)
@@ -52,7 +53,7 @@ int main(void)
 
 		BeginDrawing();
 			ClearBackground(BLUE);
-			for (int i = 0; i < WIDTH/RECT_WIDTH; i++)
+			for (int i = 0; i < WIDTH/RECT_WIDTH; i++) //Casts rays from right to left
 			{
 				float iangle = (float) i * FOV / (((float)WIDTH/RECT_WIDTH - 1.0f));
 				float cast_angle = PI/180 * (iangle - (float) FOV/2);
