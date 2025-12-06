@@ -1,4 +1,4 @@
-source = src/main.c src/player.c src/scene.c
+source = src/main.c src/player.c src/scene.c src/util.c
 libs = -lraylib -lm
 flags = -ggdb -fsanitize=address
 

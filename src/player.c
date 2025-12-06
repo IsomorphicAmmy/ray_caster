@@ -4,7 +4,7 @@
 
 #include "player.h"
 #include "scene.h"
-#include "window.h"
+#include "util.h"
 
 float distance(float x0, float y0, float x1, float y1)
 {
@@ -33,47 +33,43 @@ bool StepRay(float* rx, float* ry, float yo, float xo)
 	return false;
 }
 
-struct ColoredDistance CastRay(struct Player p, float cast_angle)
+struct ColoredDistance GetRayYCollision(float ra, float px, float py)
 {
+	struct ColoredDistance result;
 	bool colided;
-	float d;
-	float rx, ry, yo, xo;
-	float px = p.pos.x, py = p.pos.y;
-	float ra = p.angle + cast_angle;
-	Color ray_color;
-	Color yc, xc;
-
-	while (ra < 0)
-		ra += PI*2;
-	while (ra >= PI*2)
-		ra -= PI*2;
-
+	float yo, xo, rx, ry;
 	if (ra < PI) {ry = floor(py) - 0.00001f; yo = -1.0f; rx = px - (ry - py)/tan(ra); xo = -yo/tan(ra);}
 	if (ra > PI) {ry = floor(py) + 1.00001f; yo =  1.0f; rx = px - (ry - py)/tan(ra); xo = -yo/tan(ra);}
 	
-	if(ra != 0 && ra != PI)
+	if(ra != 0.0f && ra != PI)
 	{
 		colided = StepRay(&rx, &ry, yo, xo);
 		if(colided)
 		{
 			int block = GetSceneValue((int) rx, (int) ry);
 			if(block == 1)
-				yc = WHITE;
+				result.c = WHITE;
 			else if(block == 2)
-				yc = RED;
+				result.c = RED;
 		}
 	}
 	else {
 		rx = px;
 		ry = py;
-		yc = BLUE;
+		result.c = BLUE;
 	}
-	
-	float yd = distance(px, py, rx, ry);
+	result.d = distance(px, py, rx, ry);
+	return result;
+}
 
+struct ColoredDistance GetRayXCollision(float ra, float px, float py)
+{
+	struct ColoredDistance result;
+	bool colided;
+	float yo, xo, rx, ry;
 	if (ra < PI/2 || ra > 3*PI/2) {rx = floor(px) + 1.00001f; xo =  1.0f; ry = (px - rx)*tan(ra) + py; yo = -xo*tan(ra);}
 	if (ra > PI/2 && ra < 3*PI/2) {rx = floor(px) - 0.00001f; xo = -1.0f; ry = (px - rx)*tan(ra) + py; yo = -xo*tan(ra);}
-
+	
 	if(ra != PI/2 && ra != 3*PI/2)
 	{
 		colided = StepRay(&rx, &ry, yo, xo);
@@ -81,33 +77,44 @@ struct ColoredDistance CastRay(struct Player p, float cast_angle)
 		{
 			int block = GetSceneValue((int) rx, (int) ry);
 			if(block == 1)
-				xc = WHITE;
+				result.c = WHITE;
 			else if(block == 2)
-				xc = RED;
+				result.c = RED;
 		}
 	}
 	else {
 		rx = px;
 		ry = py;
-		xc = BLUE;
+		result.c = BLUE;
 	}
+	result.d = distance(px, py, rx, ry);
+	return result;
+}
 
-	float xd = distance(px, py, rx, ry);
+struct ColoredDistance CastRay(struct Player p, float cast_angle)
+{
+	float d;
+	float px = p.pos.x, py = p.pos.y;
+	float ra = p.angle + cast_angle;
+	Color ray_color;
+	FixAngle(&ra);
+	
+	struct ColoredDistance ycd = GetRayYCollision(ra, px, py);
+	struct ColoredDistance xcd = GetRayXCollision(ra, px, py);
 
-	if (cast_angle < 0.0f)
-		cast_angle = -cast_angle;
+	ModF(&cast_angle);
 
-	if (yd > xd)
+	if (ycd.d > xcd.d)
 	{
-		ray_color = xc;
-		d = xd * cos(cast_angle);
-		ray_color = (Color) {ray_color.r * 0.9, ray_color.g * 0.9, ray_color.b * 0.9, ray_color.a};
+		ray_color = xcd.c;
+		d = xcd.d * cos(cast_angle);
+		ray_color = (Color) {xcd.c.r * 0.9, xcd.c.g * 0.9, xcd.c.b * 0.9, xcd.c.a};
 	}
 	else 
 	{
-		ray_color = yc;
-		d = yd * cos(cast_angle);
-		ray_color = (Color) {ray_color.r * 0.7, ray_color.g * 0.7, ray_color.b * 0.7, ray_color.a};
+		ray_color = ycd.c;
+		d = ycd.d * cos(cast_angle);
+		ray_color = (Color) {ycd.c.r * 0.7, ycd.c.g * 0.7, ycd.c.b * 0.7, ycd.c.a};
 	}
 
 	return (struct ColoredDistance) { d, ray_color };

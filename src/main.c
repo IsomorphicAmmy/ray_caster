@@ -3,6 +3,8 @@
 
 #include "player.h"
 #include "window.h"
+#include "scene.h"
+#include "util.h"
 
 int main(void)
 {
@@ -10,9 +12,10 @@ int main(void)
 
 	struct Player p;
 	p.pos = (Vector2) {3.5f, 1.5f};
-	p.angle = PI/4;
+	p.angle = PI/4.0f;
 	float pvel = 1.0f;
 
+	Vector2 p_last_pos = p.pos;
 
 	while (!WindowShouldClose())
 	{
@@ -26,22 +29,31 @@ int main(void)
 		if (IsKeyDown(KEY_D))
 			p.pos = (Vector2) {p.pos.x + pvel * sin(p.angle) * dt, p.pos.y + pvel * cos(p.angle) * dt};
 
+		if (GetSceneValue((int) floor(p.pos.x), (int) floor(p.pos.y)) != 0)
+		{
+			if (floor(p_last_pos.x) == floor(p.pos.x) - 1)
+				p.pos.x = floor(p.pos.x) - 0.001f;
+			else if (floor(p_last_pos.x) == floor(p.pos.x) + 1)
+				p.pos.x = floor(p.pos.x) + 1.001f;
+			else if (floor(p_last_pos.y) == floor(p.pos.y) - 1)
+				p.pos.y = floor(p.pos.y) - 0.001f;
+			else if (floor(p_last_pos.y) == floor(p.pos.y) + 1)
+				p.pos.y = floor(p.pos.y) + 1.001f;
+		}
+
+		p_last_pos = p.pos;
+
 		p.angle -= GetMouseDelta().x/WIDTH*PI;
 		SetMousePosition(WIDTH/2, HEIGHT/2);
 		HideCursor();
 
-		if (p.angle < 0.0f)
-			while(p.angle < 0.0f)
-				p.angle += PI*2;
-		if (p.angle > PI*2)
-			while(p.angle > PI*2)
-				p.angle -= PI*2;
+		FixAngle(&p.angle);
 
 		BeginDrawing();
 			ClearBackground(BLUE);
 			for (int i = 0; i < WIDTH/RECT_WIDTH; i++)
 			{
-				float iangle = (float) i * FOV / (((float)WIDTH/RECT_WIDTH - 1));
+				float iangle = (float) i * FOV / (((float)WIDTH/RECT_WIDTH - 1.0f));
 				float cast_angle = PI/180 * (iangle - (float) FOV/2);
 				struct ColoredDistance cd = CastRay(p, cast_angle);
 
