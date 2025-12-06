@@ -9,6 +9,7 @@
 int main(void)
 {
 	InitWindow (WIDTH, HEIGHT, "DOOM TJOY LASTFM SPOTIFY");
+	SetTargetFPS(60);
 
 	struct Player p;
 	p.pos = (Vector2) {3.5f, 1.5f};
@@ -29,7 +30,7 @@ int main(void)
 		if (IsKeyDown(KEY_D))
 			p.pos = (Vector2) {p.pos.x + pvel * sin(p.angle) * dt, p.pos.y + pvel * cos(p.angle) * dt};
 
-		if (GetSceneValue((int) floor(p.pos.x), (int) floor(p.pos.y)) != 0)
+		while (GetSceneValue((int) floor(p.pos.x), (int) floor(p.pos.y)) != 0)
 		{
 			if (floor(p_last_pos.x) == floor(p.pos.x) - 1)
 				p.pos.x = floor(p.pos.x) - 0.001f;
@@ -62,6 +63,8 @@ int main(void)
 				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), (HEIGHT - rect_height)/2 - 1, RECT_WIDTH, rect_height + 1, cd.c);
 				DrawRectangle(WIDTH - RECT_WIDTH * (i + 1), HEIGHT - (HEIGHT - rect_height)/2 - 1, RECT_WIDTH, (HEIGHT - rect_height)/2, (Color) {127, 127, 127,255});
 			}
+			DrawRectangle(0, 0, MeasureText(TextFormat("FPS: %d", GetFPS()), 20) + 20, 40, (Color){0, 0, 0, 120});
+			DrawText(TextFormat("FPS: %d", GetFPS()), 10, 10, 20, WHITE);
 		EndDrawing();
 
 	}
